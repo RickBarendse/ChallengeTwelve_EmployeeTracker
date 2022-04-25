@@ -3,8 +3,6 @@ const inquirer = require('inquirer');
 const express = require('express');
 const cTable = require('console.table');
 const db = require('./db/connection');
-const { response } = require('express');
-const { start } = require('repl');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -24,6 +22,7 @@ db.connect((err) => {
 
 // Start application function
 startApp = () => {
+    console.log('=============================================================')
     inquirer.prompt([
         {
             // Introduction to application with list of avvailable functions 
@@ -64,6 +63,14 @@ startApp = () => {
             
             case 'Add a role':
                 addRole();
+                break;
+
+            case 'Add an employee':
+                addEmployee();
+                break;
+
+            case 'Update employee role':
+                updateEmployee();
                 break;
         }
     });
@@ -152,3 +159,95 @@ addRole = () => {
             })
         })
 };
+
+addEmployee = () => {
+    db.query(`SELECT * FROM role;`, (err, res) => {
+        if (err) throw err;
+        let roles = res.map(role => ({name: role.title, value: role.id}));
+    db.query(`SELECT * FROM employee;`, (err, res) => {
+        if (err) throw err;
+        let employees = res.map(employee => ({name: employee.first_name + ' ' + employee.last_name, value: employee.id}));
+
+        inquirer.prompt([
+            {
+                name: 'firstName',
+                type: 'input',
+                message: "What is the employee's first name?",
+            },
+            {
+                name: 'lastName',
+                type: 'input',
+                message: "What is the employee's last name?"
+            },
+            {
+                name: 'role',
+                type: 'rawlist',
+                message: "What is the employee's title?",
+                choices: roles
+            },
+            {
+                name: 'manager',
+                type: 'rawlist',
+                message: "Who is the new employee's manager?",
+                choices: employees
+            }          
+        ])
+            .then((response) => {
+                db.query(`INSERT INTO employee SET ?`,
+                {
+                    first_name: response.firstName,
+                    last_name: response.lastName,
+                    role_id: response.role,
+                    manager_id: response.manager
+                },
+                (err, res) => {
+                    if (err) throw err;
+                    console.log(` ${response.firstName} ${response.lastName} added to the database!`);
+                    startApp();
+                })
+            })
+        })
+    })
+};
+
+updateEmployee = () => {
+    db.query(`SELECT * FROM employee;`, (err, res) => {
+        if (err) throw err;
+        let employees = res.map(employee => ({name: employee.first_name + ' ' + employee.last_name, value: employee.id}));
+    db.query(`SELECT * FROM role;`, (err, res) => {
+        if (err) throw err;
+        let roles = res.map(role => ({name: role.title, value: role.id}));
+
+        inquirer.prompt([
+            {
+                name: 'employee',
+                type: 'rawlist',
+                message: 'Select the employee to update.',
+                choices: employees
+            },
+            {
+                name: 'newRole',
+                type: 'rawlist',
+                message: "Please select the employee's new role.",
+                choices: roles
+            }
+        ])
+            .then((response) => {
+                db.query(`UPDATE employee SET ? WHERE ?`,
+                [
+                    {
+                        role_id: response.newRole,
+                    },
+                    {
+                        id: response.employee,
+                    }
+                ],
+                (err, res) => {
+                    if (err) throw err;
+                    console.log(`Employee's role has been updated!`);
+                    startApp();
+                })
+            })
+        })
+    }) 
+}
