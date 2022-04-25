@@ -85,6 +85,7 @@ startApp = () => {
 
 };            
 
+// View departments function
 viewDepartments = () => {
     db.query(`SELECT * FROM department ORDER BY id ASC;`, (err, res) => {
         if (err) throw err;
@@ -93,6 +94,7 @@ viewDepartments = () => {
     })
 };
 
+// View role functioin
 viewRoles = () => {
     db.query(`SELECT role.id, role.title, role.salary, department.name, department.id FROM role JOIN department ON role.department_id = department.id ORDER BY role.id ASC;`, (err, res) => {
         if (err) throw err;
@@ -101,6 +103,7 @@ viewRoles = () => {
     })
 };
 
+// View employees function
 viewEmployees = ()=> {
     db.query(`Select e.id, e.first_name, e.last_name, role.title, department.name, role.salary, CONCAT(m.first_name, ' ', m.last_name) manager FROM employee m RIGHT JOIN employee e ON e.manager_id = m.id JOIN role ON e.role_id = role.id JOIN department ON department.id = role.department_id ORDER BY e.id ASC;`, (err, res) => {
         if (err) throw err;
@@ -109,6 +112,7 @@ viewEmployees = ()=> {
     })
 };
 
+// Add department function
 addDepartment = () => {
     inquirer.prompt([
         {
@@ -130,6 +134,7 @@ addDepartment = () => {
         })
 };
 
+// Add a role function
 addRole = () => {
     db.query(`SELECT * FROM department;`, (err, res)=> {
         if (err) throw err;
@@ -168,6 +173,7 @@ addRole = () => {
         })
 };
 
+// Add new employee function
 addEmployee = () => {
     db.query(`SELECT * FROM role;`, (err, res) => {
         if (err) throw err;
@@ -218,6 +224,7 @@ addEmployee = () => {
     })
 };
 
+// Update employee role function
 updateEmployee = () => {
     db.query(`SELECT * FROM employee;`, (err, res) => {
         if (err) throw err;
