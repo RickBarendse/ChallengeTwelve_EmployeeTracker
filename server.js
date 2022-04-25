@@ -26,6 +26,7 @@ db.connect((err) => {
 startApp = () => {
     inquirer.prompt([
         {
+            // Introduction to application with list of avvailable functions 
             name: 'initialInquiry',
             type: 'rawlist',
             message: 'Welcome to Employee Tracker.  What would you like to do?',
@@ -33,21 +34,16 @@ startApp = () => {
             [
                 'View departments', 
                 'View roles', 
-                'View employees', 
-                'View employees by manager', 
+                'View employees',  
                 'Add a department', 
                 'Add a role', 
                 'Add an employee',
                 'Update employee role',
-                'Update employee manager',
-                'Remove a department',
-                'Remove a role',
-                'Remove an employee',
-                'View total salary of department',
                 'Exit program'
             ]
         }
     ])
+    // switch cases to call functions based on user selection
     .then((response) => {
         switch (response.initialInquiry) {
             case 'View departments':
@@ -60,6 +56,10 @@ startApp = () => {
                 
             case 'View employees':
                 viewEmployees();
+                break;
+            
+                case 'Add a department':
+                addDepartment();
                 break;
         }
     });
@@ -88,4 +88,25 @@ viewEmployees = ()=> {
         console.table(res);
         startApp();
     })
+};
+
+addDepartment = () => {
+    inquirer.prompt([
+        {
+            name: 'addDept',
+            type: 'input',
+            message: 'What is the name of the department to be added?'
+        }
+    ])
+        .then((response) => {
+            db.query(`INSERT INTO department SET ?`,
+            {
+                name: response.addDept,
+            },
+            (err, res) => {
+                if (err) throw err;
+                console.log(` ${response.addDept} successfully add to the database`);
+                startApp();
+            })
+        })
 };
