@@ -56,7 +56,11 @@ startApp = () => {
             
             case 'View roles':
                 viewRoles();
-                break;          
+                break;     
+                
+            case 'View employees':
+                viewEmployees();
+                break;
         }
     });
 
@@ -76,4 +80,12 @@ viewRoles = () => {
         console.table(res);
         startApp();
     })
-}
+};
+
+viewEmployees = ()=> {
+    db.query(`Select e.id, e.first_name, e.last_name, role.title, department.name, role.salary, CONCAT(m.first_name, ' ', m.last_name) manager FROM employee m RIGHT JOIN employee e ON e.manager_id = m.id JOIN role ON e.role_id = role.id JOIN department ON department.id = role.department_id ORDER BY e.id ASC;`, (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        startApp();
+    })
+};
