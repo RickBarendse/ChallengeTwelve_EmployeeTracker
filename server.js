@@ -58,8 +58,12 @@ startApp = () => {
                 viewEmployees();
                 break;
             
-                case 'Add a department':
+            case 'Add a department':
                 addDepartment();
+                break;
+            
+            case 'Add a role':
+                addRole();
                 break;
         }
     });
@@ -107,6 +111,44 @@ addDepartment = () => {
                 if (err) throw err;
                 console.log(` ${response.addDept} successfully add to the database`);
                 startApp();
+            })
+        })
+};
+
+addRole = () => {
+    db.query(`SELECT * FROM department;`, (err, res)=> {
+        if (err) throw err;
+        let departments = res.map(department => ({name: department.name, value: department.id}));
+        inquirer.prompt([
+            {
+                name: 'addTitle',
+                type: 'input',
+                message: 'What is the position title?'
+            },
+            {
+                name: 'addSalary',
+                type: 'input',
+                message: 'What is the salary of the new role?'
+            },
+            {
+                name: 'deptName',
+                type: 'rawlist',
+                message: 'Into which department is this new role to be added?',
+                choices: departments
+            },
+        ])
+            .then((response) => {
+                db.query(`INSERT INTO role SET ?`,
+                {
+                    title: response.addTitle,
+                    salary: response.addSalary,
+                    department_id: response.deptName,
+                },
+                (err, res) => {
+                    if (err) throw err;
+                    console.log(`${response.addTitle} added to the database!`);
+                    startApp();
+                })
             })
         })
 };
