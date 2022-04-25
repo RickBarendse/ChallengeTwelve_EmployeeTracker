@@ -4,6 +4,7 @@ const express = require('express');
 const cTable = require('console.table');
 const db = require('./db/connection');
 
+
 const PORT = process.env.PORT || 3001;
 const app = express();
 
@@ -38,7 +39,7 @@ startApp = () => {
                 'Add a role', 
                 'Add an employee',
                 'Update employee role',
-                'Exit program'
+                'Exit'
             ]
         }
     ])
@@ -71,6 +72,13 @@ startApp = () => {
 
             case 'Update employee role':
                 updateEmployee();
+                break;
+
+            case 'Exit':
+                db.end();
+                console.log('Good bye!');
+                return;
+            default:
                 break;
         }
     });
