@@ -1,7 +1,10 @@
+// required modules
 const inquirer = require('inquirer');
 const express = require('express');
 const cTable = require('console.table');
 const db = require('./db/connection');
+const { response } = require('express');
+const { start } = require('repl');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -13,11 +16,13 @@ db.connect(err => {
     app.listen(PORT, () => {});
 });
 
+// Call start application funtion if no error
 db.connect((err) => {
     if (err) throw err;
     startApp();
 });
 
+// Start application function
 startApp = () => {
     inquirer.prompt([
         {
@@ -43,4 +48,32 @@ startApp = () => {
             ]
         }
     ])
+    .then((response) => {
+        switch (response.initialInquiry) {
+            case 'View departments':
+                viewDepartments();
+                break;
+            
+            case 'View roles':
+                viewRoles();
+                break;          
+        }
+    });
+
+};            
+
+viewDepartments = () => {
+    db.query(`SELECT * FROM department ORDER BY id ASC;`, (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        startApp();
+    })
+};
+
+viewRoles = () => {
+    db.query(`SELECT role.id, role.title, role.salary, department.name, department.id FROM role JOIN department ON role.department_id = department.id ORDER BY role.id ASC;`, (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        startApp();
+    })
 }
